@@ -80,11 +80,25 @@ class Piece:
 
 
 class Pawn(Piece):
+    def __init__(self, y, x, color=True):
+        super().__init__(y, x, color=color)
+        self.was_moved = False
+
     def render(self, screen_name):  # отрисовка фигуры
         pass
 
     def is_it_possible_step(self, step_y, step_x):  # проверка на возможность шага(ввод- конечные координаты)
-        return True
+        if not self.was_moved:  # создание списка изменения y-координаты
+            lst = [1, 2]
+        else:
+            lst = [1]
+        if self.color:  # фигура белая
+            if step_y - self.y in lst:  # ходит вверх на столько клеток, сколько есть в списке
+                return True
+        else:
+            if self.y - step_y in lst:  # ходит вниз на столько клеток, сколько есть в списке
+                return True
+        return False
 
 
 board = Chess()
