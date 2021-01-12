@@ -1,5 +1,4 @@
 import pygame
-from pprint import pprint
 
 
 class Board:
@@ -114,7 +113,7 @@ class Chess(Board):
                         if local_event.type == pygame.QUIT:
                             pygame.quit()
 
-                        if event.type == pygame.MOUSEBUTTONDOWN:
+                        if local_event.type == pygame.MOUSEBUTTONDOWN:
                             if local_event.button == 1:
                                 step_y, step_x = board.get_cell(local_event.pos)  # координаты хода
                                 local_running = False  # выход из цикла
