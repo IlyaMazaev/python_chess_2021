@@ -129,7 +129,9 @@ class Chess(Board):
                     if bool(steps_field[step_y][step_x]):  # если ход в координату возможен
                         if bool(self.board[step_y][step_x]):  # если в клетке хода есть фигура, то её нужно сьесть
                             self.eaten_pieces.append(self.board[step_y][step_x])  # съеденная фигура записана в листок
-                        self.board[step_y][step_x] = self.board[y][x]  # перемещение фигуры в клетку хода
+                        self.board[step_y][step_x] = self.board[y][x] # перемещение фигуры в клетку хода
+                        if type(self.board[step_y][step_x]) == Pawn:
+                            self.board[step_y][step_x].was_moved = 1
                         self.board[y][x].set_new_position(step_y, step_x)  # обновляем координаты самой фигуры
                         self.step = not self.step  # смена хода
                         print('ход выполнен')
@@ -212,10 +214,10 @@ class Pawn(Piece):
         else:
             lst = [1]
         if self.color:  # фигура белая
-            if step_y - self.y in lst:  # ходит вверх на столько клеток, сколько есть в списке
+            if self.y - step_y in lst and step_x == self.x:  # ходит вверх на столько клеток, сколько есть в списке
                 return True
         else:
-            if self.y - step_y in lst:  # ходит вниз на столько клеток, сколько есть в списке
+            if step_y - self.y in lst and step_x == self.x:  # ходит вниз на столько клеток, сколько есть в списке
                 return True
         return False
 
