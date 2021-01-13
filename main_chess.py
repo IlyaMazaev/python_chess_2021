@@ -1,4 +1,6 @@
 import pygame
+import os
+import sys
 
 
 class Board:
@@ -12,7 +14,7 @@ class Board:
         # значения по умолчанию
         self.left = 0
         self.top = 0
-        self.cell_size = 55
+        self.cell_size = 70
 
     # настройка внешнего вида
     def set_view(self, left, top, cell_size):
@@ -71,6 +73,7 @@ class Chess(Board):
     # отрисовка доски
     def render(self, input_screen):
         input_screen.fill((0, 0, 0))  # очистка экрана
+        pieces_sprites = pygame.sprite.Group()
         for i in range(self.height):
             for j in range(self.width):
                 # отрисовка фоноваго квадрата
@@ -86,10 +89,11 @@ class Chess(Board):
                                                  self.cell_size), 0)
                 #  отрисовка фигур
                 if bool(self.board[i][j]) is not False:
-                    self.board[i][j].render(input_screen)
+                    self.board[i][j].render(pieces_sprites)
+        pieces_sprites.draw(input_screen)
 
     def on_click(self, y, x, screen_of_click):  # обработчик действий на поле
-        print(y, x)
+        print('стартовые координаты:', y, x)
         if bool(self.board[y][x]):  # если нажатие произошло на фигуру
             if self.step == self.board[y][x].color:  # можно ходить только в свой ход(проверка на цвет фигуры = хода)
                 self.render(screen_of_click)  # отривоска самой доски и фигур
@@ -117,14 +121,17 @@ class Chess(Board):
                             if local_event.button == 1:
                                 step_y, step_x = board.get_cell(local_event.pos)  # координаты хода
                                 local_running = False  # выход из цикла
-                    local_clock.tick(60)
+                    local_clock.tick(30)
+                print('координаты хода:', step_y, step_x)
 
-                if step_y != y and step_x != x:  # нельзя сходить в клетку старта
+                if step_y != y or step_x != x:  # нельзя сходить в клетку старта
                     if bool(steps_field[step_y][step_x]):  # если ход в координату возможен
                         if bool(self.board[step_y][step_x]):  # если в клетке хода есть фигура, то её нужно сьесть
                             self.eaten_pieces.append(self.board[step_y][step_x])  # съеденная фигура записана в листок
-                        self.board[step_y][step_x] = self.board[y][x].copy()  # перемещение фигуры в клетку хода
+                        self.board[step_y][step_x] = self.board[y][x]  # перемещение фигуры в клетку хода
+                        self.board[y][x].set_new_position(step_y, step_x)  # обновляем координаты самой фигуры
                         self.step = not self.step  # смена хода
+                        print('ход выполнен')
 
 
 class Piece:
@@ -150,8 +157,23 @@ class Piece:
     def get_pos(self):
         return self.get_y(), self.get_x()
 
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defied'):
+        fullname = os.path.join('обрезанные шахматы', image_name)  # путь к фаилу с картинкой
+        # если файл не существует, то выходим
+        if not os.path.isfile(fullname):
+            print(f"Файл с изображением '{fullname}' не найден")
+            sys.exit()
+        image = pygame.image.load(fullname)
+
+        transformed_image = pygame.transform.scale(image, (sprite_size_y, sprite_size_x))  # подгонка размеров картинки
+        sprite = pygame.sprite.Sprite(sprite_group)  # создание спрайта в группе спрайтов
+        sprite.image = transformed_image  # картинка спарайтиа
+        sprite.rect = sprite.image.get_rect()
+        sprite.rect.y = self.get_y() * 70 + delta_y  # y координата спрайта
+        sprite.rect.x = self.get_x() * 70 + delta_x  # x координата спрайта
+
     def is_it_possible_step(self, step_y, step_x):  # проверка на возможность шага(ввод- конечные координаты)
-        return False
+        return True
 
     def possible_steps_field(self):
         steps_field = []
@@ -171,8 +193,17 @@ class Pawn(Piece):
         super().__init__(y, x, color=color)
         self.was_moved = False
 
-    def render(self, screen_name):  # отрисовка фигуры
-        pass
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defied'):  # отрисовка фигуры
+        if self.color:  # если пешка белая
+            image_name = 'white_pawn.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
+            delta_y, delta_x = 10, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
+        elif self.color is False:
+            image_name = 'black_pawn.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 75, 75   # размеры картинки спрайта
+            delta_y, delta_x = 0, 2  # тут можно подкрутить расположение спрайта фигуры в клетке
+        # вызов общего кода отрисовки в родительском классе Piece
+        super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x):  # проверка на возможность шага(ввод- конечные координаты)
         if not self.was_moved:  # создание списка изменения y-координаты
@@ -197,7 +228,7 @@ screen = pygame.display.set_mode((board.cell_size * board.width, board.cell_size
 pygame.display.set_caption('Шахматы')
 
 clock = pygame.time.Clock()
-FPS = 60
+FPS = 30
 
 running = True
 while running:
