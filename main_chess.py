@@ -219,15 +219,15 @@ class Pawn(Piece):
         else:
             lst = [1]
         if self.color:  # фигура белая
-            if self.y - step_y in lst and step_x == self.x:  # ходит вверх на столько клеток, сколько есть в списке
+            if self.y - step_y in lst and step_x == self.x and type(board[step_y][step_x]) == int:  # ходит вверх на столько клеток, сколько есть в списке
                 return True
             elif abs(step_x - self.x) == 1 and self.y - step_y == 1 and \
                     type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
                 return True
         else:
-            if step_y - self.y in lst and step_x == self.x:  # ходит вниз на столько клеток, сколько есть в списке
+            if step_y - self.y in lst and step_x == self.x and type(board[step_y][step_x]) == int:  # ходит вниз на столько клеток, сколько есть в списке
                 return True
-            elif abs(step_x - self.x) == 1 and self.y - step_y == 1 and \
+            elif abs(step_x - self.x) == 1 and step_y - self.y == 1 and \
                     type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
                 return True
         return False
