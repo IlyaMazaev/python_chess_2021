@@ -98,7 +98,7 @@ class Chess(Board):
             if self.step == self.board[y][x].color:  # можно ходить только в свой ход(проверка на цвет фигуры = хода)
                 self.render(screen_of_click)  # отривоска самой доски и фигур
 
-                steps_field = self.board[y][x].possible_steps_field()  # получение всех возможный ходов фигуры
+                steps_field = self.board[y][x].possible_steps_field(self.board)  # получение всех возможный ходов фигуры
                 for i in range(8):
                     for j in range(8):
                         if bool(steps_field[i][j]):  # если ход возможен в координату
@@ -129,7 +129,7 @@ class Chess(Board):
                     if bool(steps_field[step_y][step_x]):  # если ход в координату возможен
                         if bool(self.board[step_y][step_x]):  # если в клетке хода есть фигура, то её нужно сьесть
                             self.eaten_pieces.append(self.board[step_y][step_x])  # съеденная фигура записана в листок
-                        self.board[step_y][step_x] = self.board[y][x] # перемещение фигуры в клетку хода
+                        self.board[step_y][step_x] = self.board[y][x]  # перемещение фигуры в клетку хода
                         if type(self.board[step_y][step_x]) == Pawn:
                             self.board[step_y][step_x].was_moved = 1
                         self.board[y][x].set_new_position(step_y, step_x)  # обновляем координаты самой фигуры
@@ -147,6 +147,9 @@ class Piece:
 
     def __repr__(self):
         return str(type(self).__name__) + ' y:' + str(self.get_y()) + ' x:' + str(self.get_x())
+
+    def get_color(self):
+        return self.color
 
     def set_new_position(self, y, x):
         self.y, self.x = y, x
@@ -175,15 +178,15 @@ class Piece:
         sprite.rect.y = self.get_y() * 70 + delta_y  # y координата спрайта
         sprite.rect.x = self.get_x() * 70 + delta_x  # x координата спрайта
 
-    def is_it_possible_step(self, step_y, step_x):  # проверка на возможность шага(ввод- конечные координаты)
+    def is_it_possible_step(self, step_y, step_x, board):  # проверка на возможность шага(ввод- конечные координаты)
         return True
 
-    def possible_steps_field(self):
+    def possible_steps_field(self, board):
         steps_field = []
         for y in range(8):
             line = []
             for x in range(8):
-                if self.is_it_possible_step(y, x):
+                if self.is_it_possible_step(y, x, board):
                     line.append(1)
                 else:
                     line.append(0)
@@ -194,9 +197,9 @@ class Piece:
 class Pawn(Piece):
     def __init__(self, y, x, color=True):
         super().__init__(y, x, color=color)
-        self.was_moved = False
+        self.was_moved = False  # была ли сдвинута пешка хоть раз
 
-    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defied'):  # отрисовка фигуры
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):  # отрисовка фигуры
         if self.color:  # если пешка белая
             image_name = 'white_pawn.png'  # имя фаила картинки
             sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
@@ -208,7 +211,7 @@ class Pawn(Piece):
         # вызов общего кода отрисовки в родительском классе Piece
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
-    def is_it_possible_step(self, step_y, step_x):  # проверка на возможность шага(ввод- конечные координаты)
+    def is_it_possible_step(self, step_y, step_x, board):  # проверка на возможность шага(ввод- конечные координаты)
         if not self.was_moved:  # создание списка изменения y-координаты
             lst = [1, 2]
         else:
@@ -216,10 +219,73 @@ class Pawn(Piece):
         if self.color:  # фигура белая
             if self.y - step_y in lst and step_x == self.x:  # ходит вверх на столько клеток, сколько есть в списке
                 return True
+            elif abs(step_x - self.x) == 1 and self.y - step_y == 1 and \
+                    type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
+                return True
         else:
             if step_y - self.y in lst and step_x == self.x:  # ходит вниз на столько клеток, сколько есть в списке
                 return True
+            elif abs(step_x - self.x) == 1 and self.y - step_y == 1 and \
+                    type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
+                return True
         return False
+
+
+class Rook(Piece):
+    def __init__(self, y, x, color=True):
+        super().__init__(y, x, color)
+        self.was_moved = False  # на будущее для рокировки
+
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
+        pass
+
+    def is_it_possible_step(self, step_y, step_x, board):
+        pass
+
+
+class King(Piece):
+    def __init__(self, y, x, color=True):
+        super().__init__(y, x, color)
+        self.was_moved = False  # на будущее для рокировки
+
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
+        pass
+
+    def is_it_possible_step(self, step_y, step_x, board):
+        pass
+
+
+class Queen(Piece):
+    def __init__(self, y, x, color=True):
+        super().__init__(y, x, color)
+
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
+        pass
+
+    def is_it_possible_step(self, step_y, step_x, board):
+        pass
+
+
+class Bishop(Piece):
+    def __init__(self, y, x, color=True):
+        super().__init__(y, x, color)
+
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
+        pass
+
+    def is_it_possible_step(self, step_y, step_x, board):
+        pass
+
+
+class Knight(Piece):
+    def __init__(self, y, x, color=True):
+        super().__init__(y, x, color)
+
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
+        pass
+
+    def is_it_possible_step(self, step_y, step_x, board):
+        pass
 
 
 board = Chess()
