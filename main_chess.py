@@ -43,17 +43,16 @@ class Chess(Board):
         for i in range(8):
             self.board[1][i] = Pawn(1, i, False)  # чёрная пешка
             self.board[6][i] = Pawn(6, i, True)  # белая пешка
-        '''
         # ладьи:
         self.board[0][0] = Rook(0, 0, False)
         self.board[0][7] = Rook(0, 7, False)
         self.board[7][0] = Rook(7, 0, True)
         self.board[7][7] = Rook(7, 7, True)
         # кони:
-        self.board[0][1] = Horse(0, 1, False)
-        self.board[0][6] = Horse(0, 6, False)
-        self.board[7][1] = Horse(7, 1, True)
-        self.board[7][6] = Horse(7, 6, True)
+        self.board[0][1] = Knight(0, 1, False)
+        self.board[0][6] = Knight(0, 6, False)
+        self.board[7][1] = Knight(7, 1, True)
+        self.board[7][6] = Knight(7, 6, True)
         # слоны:
         self.board[0][2] = Bishop(0, 2, False)
         self.board[0][5] = Bishop(0, 5, False)
@@ -65,7 +64,6 @@ class Chess(Board):
         # короли:
         self.board[0][4] = King(0, 4, False)
         self.board[7][4] = King(7, 4, True)
-        '''
 
         self.step = True  # True означает белый цвет хода
         self.eaten_pieces = []  # листок, который хранит съеденные фигуры
@@ -239,7 +237,16 @@ class Rook(Piece):
         self.was_moved = False  # на будущее для рокировки
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
-        pass
+        if self.color:  # если пешка белая
+            image_name = 'white_rook.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
+            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+        elif self.color is False:
+            image_name = 'black_rook.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
+            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+        # вызов общего кода отрисовки в родительском классе Piece
+        super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
         pass
@@ -251,7 +258,16 @@ class King(Piece):
         self.was_moved = False  # на будущее для рокировки
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
-        pass
+        if self.color:  # если пешка белая
+            image_name = 'white_king.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
+            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+        elif self.color is False:
+            image_name = 'black_king.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
+            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+        # вызов общего кода отрисовки в родительском классе Piece
+        super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
         pass
@@ -262,7 +278,16 @@ class Queen(Piece):
         super().__init__(y, x, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
-        pass
+        if self.color:  # если пешка белая
+            image_name = 'white_queen.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
+            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+        elif self.color is False:
+            image_name = 'black_queen.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
+            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+        # вызов общего кода отрисовки в родительском классе Piece
+        super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
         pass
@@ -273,7 +298,16 @@ class Bishop(Piece):
         super().__init__(y, x, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
-        pass
+        if self.color:  # если пешка белая
+            image_name = 'white_bishop.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
+            delta_y, delta_x = 10, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
+        elif self.color is False:
+            image_name = 'black_bishop.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
+            delta_y, delta_x = 0, 2  # тут можно подкрутить расположение спрайта фигуры в клетке
+        # вызов общего кода отрисовки в родительском классе Piece
+        super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
         pass
@@ -284,7 +318,16 @@ class Knight(Piece):
         super().__init__(y, x, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
-        pass
+        if self.color:  # если пешка белая
+            image_name = 'white_knight.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
+            delta_y, delta_x = 10, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
+        elif self.color is False:
+            image_name = 'black_knight.png'  # имя фаила картинки
+            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
+            delta_y, delta_x = 0, 2  # тут можно подкрутить расположение спрайта фигуры в клетке
+        # вызов общего кода отрисовки в родительском классе Piece
+        super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
         pass
