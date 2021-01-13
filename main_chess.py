@@ -106,7 +106,8 @@ class Chess(Board):
                             pygame.draw.circle(screen_of_click, pygame.Color('Green'),
                                                (self.left + self.cell_size * j + self.cell_size // 2,
                                                 self.top + self.cell_size * i + self.cell_size // 2),
-                                               self.cell_size // 2 - 2, 3)
+                                               self.cell_size // 2 - 20, 3)
+                pygame.display.flip()
 
                 # вылавливание второго нажатия на поле для выбора конечной координаты хода
                 step_y, step_x = 10, 10  # неправильные значения хода(если вылетит с этим, то проблемма в цикле)
