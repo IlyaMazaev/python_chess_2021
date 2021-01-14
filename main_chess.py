@@ -289,7 +289,9 @@ class Rook(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        pass
+        if step_y == self.y or step_x == self.x:
+            return True
+        return False
 
 
 class King(Piece):
@@ -310,7 +312,10 @@ class King(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        pass
+        if abs(step_y - self.y) <= 1 and abs(step_x - self.x) <= 1 and \
+                not (abs(step_x - self.x) == abs(step_y - self.y) == 0):
+            return True
+        return False
 
 
 class Queen(Piece):
@@ -330,7 +335,9 @@ class Queen(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        pass
+        if (step_y == self.y or step_x == self.x) or abs(step_x - self.x) == abs(self.y - step_y):
+            return True
+        return False
 
 
 class Bishop(Piece):
@@ -350,7 +357,9 @@ class Bishop(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        pass
+        if abs(step_x - self.x) == abs(self.y - step_y):
+            return True
+        return False
 
 
 class Knight(Piece):
@@ -370,7 +379,9 @@ class Knight(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        pass
+        if abs(step_x - self.x) in [1, 2] and abs(step_y - self.y) in [1, 2] and abs(step_x - self.x) != abs(step_y - self.y):
+            return True
+        return False
 
 
 board = Chess()
