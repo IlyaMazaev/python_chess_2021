@@ -42,29 +42,29 @@ class Chess(Board):
         # расстановка фигур:
         # пешки:
         for i in range(8):
-            self.board[1][i] = Pawn(1, i, False)  # чёрная пешка
-            self.board[6][i] = Pawn(6, i, True)  # белая пешка
+            self.board[1][i] = Pawn(1, i, self.board, False)  # чёрная пешка
+            self.board[6][i] = Pawn(6, i, self.board, True)  # белая пешка
         # ладьи:
-        self.board[0][0] = Rook(0, 0, False)
-        self.board[0][7] = Rook(0, 7, False)
-        self.board[7][0] = Rook(7, 0, True)
-        self.board[7][7] = Rook(7, 7, True)
+        self.board[0][0] = Rook(0, 0, self.board, False)
+        self.board[0][7] = Rook(0, 7, self.board, False)
+        self.board[7][0] = Rook(7, 0, self.board, True)
+        self.board[7][7] = Rook(7, 7, self.board, True)
         # кони:
-        self.board[0][1] = Knight(0, 1, False)
-        self.board[0][6] = Knight(0, 6, False)
-        self.board[7][1] = Knight(7, 1, True)
-        self.board[7][6] = Knight(7, 6, True)
+        self.board[0][1] = Knight(0, 1, self.board, False)
+        self.board[0][6] = Knight(0, 6, self.board, False)
+        self.board[7][1] = Knight(7, 1, self.board, True)
+        self.board[7][6] = Knight(7, 6, self.board, True)
         # слоны:
-        self.board[0][2] = Bishop(0, 2, False)
-        self.board[0][5] = Bishop(0, 5, False)
-        self.board[7][2] = Bishop(7, 2, True)
-        self.board[7][5] = Bishop(7, 5, True)
+        self.board[0][2] = Bishop(0, 2, self.board, False)
+        self.board[0][5] = Bishop(0, 5, self.board, False)
+        self.board[7][2] = Bishop(7, 2, self.board, True)
+        self.board[7][5] = Bishop(7, 5, self.board, True)
         # ферзи:
-        self.board[0][3] = Queen(0, 3, False)
-        self.board[7][3] = Queen(7, 3, True)
+        self.board[0][3] = Queen(0, 3, self.board, False)
+        self.board[7][3] = Queen(7, 3, self.board, True)
         # короли:
-        self.board[0][4] = King(0, 4, False)
-        self.board[7][4] = King(7, 4, True)
+        self.board[0][4] = King(0, 4, self.board, False)
+        self.board[7][4] = King(7, 4, self.board, True)
 
         self.step = True  # True означает белый цвет хода
         self.eaten_pieces = []  # листок, который хранит съеденные фигуры
@@ -197,11 +197,12 @@ class Chess(Board):
 
 
 class Piece:
-    def __init__(self, y, x, color=True):
+    def __init__(self, y, x, board, color=True):
         self.y, self.x = y, x  # координаты фигуры (y-сверху, x-слева-направо)
         self.color = color  # значение True означает белый цвет фигуры
         self.is_alive = True  # жива ли фигура
         self.was_moved = False  # была ли сдвинута фигура
+        self.board = board
 
     def __hash__(self):
         return hash((str(type(self).__name__), self.x, self.y))
@@ -223,6 +224,99 @@ class Piece:
 
     def get_pos(self):
         return self.get_y(), self.get_x()
+
+    def get_linear_moves(self):
+        board = self.board
+        a1 = [[self.y, i] for i in range(self.x + 1, 8)]
+        a2 = [[self.y, i] for i in range(0, self.x)][::-1]
+        a3 = [[i, self.x] for i in range(self.y + 1, 8)]
+        a4 = [[i, self.x] for i in range(0, self.y)][::-1]
+        for i in range(len(a1)):
+            if type(board[a1[i][0]][a1[i][1]]) != int:
+                if board[a1[i][0]][a1[i][1]].get_color() == self.color:
+                    a1 = a1[:i]
+                else:
+                    a1 = a1[:i + 1]
+                break
+        for i in range(len(a2)):
+            if type(board[a2[i][0]][a2[i][1]]) != int:
+                if board[a2[i][0]][a2[i][1]].get_color() == self.color:
+                    a2 = a2[:i]
+                else:
+                    a2 = a2[:i + 1]
+                break
+        for i in range(len(a3)):
+            if type(board[a3[i][0]][a3[i][1]]) != int:
+                if board[a3[i][0]][a3[i][1]].get_color() == self.color:
+                    a3 = a3[:i]
+                else:
+                    a3 = a3[:i + 1]
+                break
+        for i in range(len(a4)):
+            if type(board[a4[i][0]][a4[i][1]]) != int:
+                if board[a4[i][0]][a4[i][1]].get_color() == self.color:
+                    a4 = a4[:i]
+                else:
+                    a4 = a4[:i + 1]
+                break
+        return a1 + a2 + a3 + a4
+
+    def get_diagonal_moves(self):
+        board = self.board
+        a1 = []
+        curr = [self.y - 1, self.x - 1]
+        while curr[0] >= 0 and curr[1] >= 0:
+            a1.append(curr.copy())
+            curr[0] -= 1
+            curr[1] -= 1
+        a2 = []
+        curr = [self.y + 1, self.x + 1]
+        while curr[0] <= 7 and curr[1] <= 7:
+            a2.append(curr.copy())
+            curr[0] += 1
+            curr[1] += 1
+        a3 = []
+        curr = [self.y - 1, self.x + 1]
+        while curr[0] >= 0 and curr[1] <= 7:
+            a3.append(curr.copy())
+            curr[0] -= 1
+            curr[1] += 1
+        a4 = []
+        curr = [self.y + 1, self.x - 1]
+        while curr[0] <= 7 and curr[1] >= 0:
+            a4.append(curr.copy())
+            curr[0] += 1
+            curr[1] -= 1
+        a4 = a4[::-1]
+        for i in range(len(a1)):
+            if type(board[a1[i][0]][a1[i][1]]) != int:
+                if board[a1[i][0]][a1[i][1]].get_color() == self.color:
+                    a1 = a1[:i]
+                else:
+                    a1 = a1[:i + 1]
+                break
+        for i in range(len(a2)):
+            if type(board[a2[i][0]][a2[i][1]]) != int:
+                if board[a2[i][0]][a2[i][1]].get_color() == self.color:
+                    a2 = a2[:i]
+                else:
+                    a2 = a2[:i + 1]
+                break
+        for i in range(len(a3)):
+            if type(board[a3[i][0]][a3[i][1]]) != int:
+                if board[a3[i][0]][a3[i][1]].get_color() == self.color:
+                    a3 = a3[:i]
+                else:
+                    a3 = a3[:i + 1]
+                break
+        for i in range(len(a4)):
+            if type(board[a4[i][0]][a4[i][1]]) != int:
+                if board[a4[i][0]][a4[i][1]].get_color() == self.color:
+                    a4 = a4[:i]
+                else:
+                    a4 = a4[:i + 1]
+                break
+        return a1 + a2 + a3 + a4
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defied'):
         fullname = os.path.join('обрезанные шахматы', image_name)  # путь к фаилу с картинкой
@@ -263,8 +357,8 @@ class Piece:
 
 
 class Pawn(Piece):
-    def __init__(self, y, x, color=True):
-        super().__init__(y, x, color=color)
+    def __init__(self, y, x, board, color=True):
+        super().__init__(y, x, board, color=color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
@@ -286,30 +380,32 @@ class Pawn(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):  # проверка на возможность шага(ввод- конечные координаты)
-        if not self.was_moved:  # создание списка изменения y-координаты
-            lst = [1, 2]
+        accepted = []
+        if self.color:
+            if type(board[self.y - 1][self.x]) == int:
+                accepted.append([self.y - 1, self.x])
+            if not self.was_moved and type(board[self.y - 2][self.x]):
+                accepted.append([self.y - 2, self.x])
+            if type(board[self.y - 1][self.x + 1]) != int and board[self.y - 1][self.x + 1].get_color() != self.color:
+                accepted.append([self.y + 1, self.x + 1])
+            if type(board[self.y - 1][self.x - 1]) != int and board[self.y - 1][self.x - 1].get_color() != self.color:
+                accepted.append([self.y - 1, self.x - 1])
         else:
-            lst = [1]
-        if self.color:  # фигура белая
-            if self.y - step_y in lst and step_x == self.x and type(board[step_y][step_x]) == int:
-                # ходит вверх на столько клеток, сколько есть в списке
-                return True
-            elif abs(step_x - self.x) == 1 and self.y - step_y == 1 and \
-                    type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
-                return True
-        else:
-            if step_y - self.y in lst and step_x == self.x and type(board[step_y][step_x]) == int:
-                # ходит вниз на столько клеток, сколько есть в списке
-                return True
-            elif abs(step_x - self.x) == 1 and step_y - self.y == 1 and \
-                    type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
-                return True
+            accepted.append([self.y + 1, self.x])
+            if not self.was_moved:
+                accepted.append([self.y + 2, self.x])
+            if type(board[self.y + 1][self.x + 1]) != int and board[self.y + 1][self.x + 1].get_color() != self.color:
+                accepted.append([self.y + 1, self.x + 1])
+            if type(board[self.y + 1][self.x - 1]) != int and board[self.y + 1][self.x - 1].get_color() != self.color:
+                accepted.append([self.y + 1, self.x - 1])
+        if [step_y, step_x] in accepted:
+            return True
         return False
 
 
 class Rook(Piece):
-    def __init__(self, y, x, color=True):
-        super().__init__(y, x, color)
+    def __init__(self, y, x, board, color=True):
+        super().__init__(y, x, board, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
@@ -330,46 +426,15 @@ class Rook(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        a1 = [[self.y, i] for i in range(self.x + 1, 8)]
-        a2 = [[self.y, i] for i in range(0, self.x)][::-1]
-        a3 = [[i, self.x] for i in range(self.y + 1, 8)]
-        a4 = [[i, self.x] for i in range(0, self.y)][::-1]
-        for i in range(len(a1)):
-            if type(board[a1[i][0]][a1[i][1]]) != int:
-                if board[a1[i][0]][a1[i][1]].get_color() == self.color:
-                    a1 = a1[:i]
-                else:
-                    a1 = a1[:i + 1]
-                break
-        for i in range(len(a2)):
-            if type(board[a2[i][0]][a2[i][1]]) != int:
-                if board[a2[i][0]][a2[i][1]].get_color() == self.color:
-                    a2 = a2[:i]
-                else:
-                    a2 = a2[:i + 1]
-                break
-        for i in range(len(a3)):
-            if type(board[a3[i][0]][a3[i][1]]) != int:
-                if board[a3[i][0]][a3[i][1]].get_color() == self.color:
-                    a3 = a3[:i]
-                else:
-                    a3 = a3[:i + 1]
-                break
-        for i in range(len(a4)):
-            if type(board[a4[i][0]][a4[i][1]]) != int:
-                if board[a4[i][0]][a4[i][1]].get_color() == self.color:
-                    a4 = a4[:i]
-                else:
-                    a4 = a4[:i + 1]
-                break
-        if [step_y, step_x] in a1 + a2 + a3 + a4:
+        accepted = self.get_linear_moves()
+        if [step_y, step_x] in accepted:
             return True
         return False
 
 
 class King(Piece):
-    def __init__(self, y, x, color=True):
-        super().__init__(y, x, color)
+    def __init__(self, y, x, board, color=True):
+        super().__init__(y, x, board, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
@@ -390,15 +455,33 @@ class King(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        if abs(step_y - self.y) <= 1 and abs(step_x - self.x) <= 1 and \
-                not (abs(step_x - self.x) == abs(step_y - self.y) == 0):
+        accepted = []
+        f1, f2, f3, f4 = self.y > 0, self.y < 7, self.x > 0, self.x < 7
+        if f1:
+            accepted.append([self.y - 1, self.x])
+            if f3:
+                accepted.append([self.y - 1, self.x - 1])
+        if f2:
+            accepted.append([self.y + 1, self.x])
+            if f4:
+                accepted.append([self.y + 1, self.x + 1])
+        if f3:
+            accepted.append([self.y, self.x - 1])
+            if f2:
+                accepted.append([self.y + 1, self.x - 1])
+        if f4:
+            accepted.append([self.y, self.x + 1])
+            if f1:
+                accepted.append([self.y - 1, self.x + 1])
+        accepted = [i for i in accepted if type(board[i[0]][i[1]]) == int or board[i[0]][i[1]].get_color() != self.color]
+        if [step_y, step_x] in accepted:
             return True
         return False
 
 
 class Queen(Piece):
-    def __init__(self, y, x, color=True):
-        super().__init__(y, x, color)
+    def __init__(self, y, x, board, color=True):
+        super().__init__(y, x, board, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
@@ -419,14 +502,15 @@ class Queen(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        if (step_y == self.y or step_x == self.x) or abs(step_x - self.x) == abs(self.y - step_y):
+        accepted = self.get_linear_moves() + self.get_diagonal_moves()
+        if [step_y, step_x] in accepted:
             return True
         return False
 
 
 class Bishop(Piece):
-    def __init__(self, y, x, color=True):
-        super().__init__(y, x, color)
+    def __init__(self, y, x, board, color=True):
+        super().__init__(y, x, board, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
@@ -447,14 +531,15 @@ class Bishop(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        if abs(step_x - self.x) == abs(self.y - step_y):
+        accepted = self.get_diagonal_moves()
+        if [step_y, step_x] in accepted:
             return True
         return False
 
 
 class Knight(Piece):
-    def __init__(self, y, x, color=True):
-        super().__init__(y, x, color)
+    def __init__(self, y, x, board, color=True):
+        super().__init__(y, x, board, color)
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
