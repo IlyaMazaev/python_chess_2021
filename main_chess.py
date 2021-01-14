@@ -97,6 +97,21 @@ class Chess(Board):
                 self.render(screen_of_click)  # отривоска самой доски и фигур
 
                 steps_field = self.board[y][x].possible_steps_field(self.board)  # получение всех возможный ходов фигуры
+
+                # проверка на возможность рокировки:
+                # для белой стороны
+                if (y, x) == (7, 4) and isinstance(self.board[y][x], King) and isinstance(self.board[7][7], Rook):
+                    # если король стоит на месте хода и ладья на своем
+                    if self.board[7][5] == 0 and self.board[7][6] == 0:  # если между ними нет других фигур
+                        if not self.board[y][x].was_moved and not self.board[7][7].was_moved:  # если они не ходили
+                            steps_field[7][6] = 1  # добавляем возможность хода на 2 клетки для рокировки
+                # для чёрной стороны
+                elif (y, x) == (0, 4) and isinstance(self.board[y][x], King) and isinstance(self.board[0][7], Rook):
+                    # если король стоит на месте хода и ладья на своем
+                    if self.board[0][5] == 0 and self.board[0][6] == 0:  # если между ними нет других фигур
+                        if not self.board[y][x].was_moved and not self.board[0][7].was_moved:  # если они не ходили
+                            steps_field[0][6] = 1 # добавляем возможность хода на 2 клетки для рокировки
+
                 for i in range(8):
                     for j in range(8):
                         if bool(steps_field[i][j]):  # если ход возможен в координату
@@ -125,6 +140,30 @@ class Chess(Board):
 
                 if step_y != y or step_x != x:  # нельзя сходить в клетку старта
                     if bool(steps_field[step_y][step_x]):  # если ход в координату возможен
+                        #  рокировка:
+                        if (  # для белой стороны
+                                (y, x) == (7, 4)
+                                and isinstance(self.board[y][x], King)  # если ход королём в клетку рокировки
+                                and (step_y, step_x) == (7, 6)
+                        ):
+                            self.board[7][5] = self.board[7][7]  # перемещаем ладью
+                            self.board[7][5].set_new_position(7, 5)  # обновляем координаты ладьи
+                            self.board[7][5].was_moved = 1  # меняем флаг ладьи (т.к она ходила)
+                            self.board[y][x].was_moved = 1  # меняем флаг короля (т.к она ходила)
+                            self.board[7][7] = 0  # очистка начальной координаты ладьи
+                            # если рокировка произошла, то король идёт по основному алгоритму
+                        elif (  # для чёрной стороны
+                                (y, x) == (0, 4)
+                                and isinstance(self.board[y][x], King)  # если ход королём в клетку рокировки
+                                and (step_y, step_x) == (0, 6)
+                        ):
+                            self.board[0][5] = self.board[0][7]  # перемещаем ладью
+                            self.board[0][5].set_new_position(0, 5)  # обновляем координаты ладьи
+                            self.board[0][5].was_moved = 1   # меняем флаг ладьи (т.к она ходила)
+                            self.board[y][x].was_moved = 1  # меняем флаг короля (т.к она ходила)
+                            self.board[0][7] = 0  # очистка начальной координаты ладьи
+                            # если рокировка произошла, то король идёт по основному алгоритму
+
                         if bool(self.board[step_y][step_x]):  # если в клетке хода есть фигура, то её нужно сьесть
                             self.eaten_pieces.append(self.board[step_y][step_x])  # съеденная фигура записана в листок
                         self.board[step_y][step_x] = 0  # очистка клетки шага
@@ -133,6 +172,7 @@ class Chess(Board):
                             self.board[step_y][step_x].was_moved = 1
                         self.board[y][x].set_new_position(step_y, step_x)  # обновляем координаты самой фигуры
                         self.board[y][x] = 0  # очистка начальной координаты хода
+
                         self.step = not self.step  # смена хода
                         print('ход выполнен')
 
