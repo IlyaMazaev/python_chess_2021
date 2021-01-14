@@ -202,12 +202,12 @@ class Pawn(Piece):
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):  # отрисовка фигуры
         if self.color:  # если пешка белая
             image_name = 'white_pawn.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
-            delta_y, delta_x = 10, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         elif self.color is False:
             image_name = 'black_pawn.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 75, 75   # размеры картинки спрайта
-            delta_y, delta_x = 0, 2  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60   # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         # вызов общего кода отрисовки в родительском классе Piece
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
@@ -239,12 +239,12 @@ class Rook(Piece):
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if self.color:  # если пешка белая
             image_name = 'white_rook.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
-            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         elif self.color is False:
             image_name = 'black_rook.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
-            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         # вызов общего кода отрисовки в родительском классе Piece
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
@@ -260,12 +260,12 @@ class King(Piece):
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if self.color:  # если пешка белая
             image_name = 'white_king.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
-            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         elif self.color is False:
             image_name = 'black_king.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
-            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         # вызов общего кода отрисовки в родительском классе Piece
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
@@ -280,12 +280,12 @@ class Queen(Piece):
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if self.color:  # если пешка белая
             image_name = 'white_queen.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
-            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 60, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
         elif self.color is False:
             image_name = 'black_queen.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
-            delta_y, delta_x = 0, 0  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 60, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
         # вызов общего кода отрисовки в родительском классе Piece
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
@@ -300,12 +300,12 @@ class Bishop(Piece):
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if self.color:  # если пешка белая
             image_name = 'white_bishop.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
-            delta_y, delta_x = 10, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         elif self.color is False:
             image_name = 'black_bishop.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
-            delta_y, delta_x = 0, 2  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         # вызов общего кода отрисовки в родительском классе Piece
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
@@ -320,12 +320,12 @@ class Knight(Piece):
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if self.color:  # если пешка белая
             image_name = 'white_knight.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 55, 60  # размеры картинки спрайта
-            delta_y, delta_x = 10, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         elif self.color is False:
             image_name = 'black_knight.png'  # имя фаила картинки
-            sprite_size_y, sprite_size_x = 75, 75  # размеры картинки спрайта
-            delta_y, delta_x = 0, 2  # тут можно подкрутить расположение спрайта фигуры в клетке
+            sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
+            delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
         # вызов общего кода отрисовки в родительском классе Piece
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
