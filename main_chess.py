@@ -1,3 +1,4 @@
+from copy import deepcopy
 import pygame
 import os
 import sys
@@ -67,6 +68,7 @@ class Chess(Board):
 
         self.step = True  # True означает белый цвет хода
         self.eaten_pieces = []  # листок, который хранит съеденные фигуры
+        self.board_history = []  # для записи ходов
 
     # отрисовка доски
     def render(self, input_screen):
@@ -94,6 +96,7 @@ class Chess(Board):
         print('стартовые координаты:', y, x)
         if bool(self.board[y][x]):  # если нажатие произошло на фигуру
             if self.step == self.board[y][x].color:  # можно ходить только в свой ход(проверка на цвет фигуры = хода)
+                board_before_step = deepcopy(self)
                 self.render(screen_of_click)  # отривоска самой доски и фигур
 
                 steps_field = self.board[y][x].possible_steps_field(self.board)  # получение всех возможный ходов фигуры
@@ -110,7 +113,7 @@ class Chess(Board):
                     # если король стоит на месте хода и ладья на своем
                     if self.board[0][5] == 0 and self.board[0][6] == 0:  # если между ними нет других фигур
                         if not self.board[y][x].was_moved and not self.board[0][7].was_moved:  # если они не ходили
-                            steps_field[0][6] = 1 # добавляем возможность хода на 2 клетки для рокировки
+                            steps_field[0][6] = 1  # добавляем возможность хода на 2 клетки для рокировки
 
                 for i in range(8):
                     for j in range(8):
@@ -174,6 +177,8 @@ class Chess(Board):
                         self.board[y][x] = 0  # очистка начальной координаты хода
 
                         self.step = not self.step  # смена хода
+                        self.board_history.append(board_before_step)
+                        print(len(self.board_history))
                         print('ход выполнен')
 
 
@@ -239,7 +244,8 @@ class Pawn(Piece):
         super().__init__(y, x, color=color)
         self.was_moved = False  # была ли сдвинута пешка хоть раз
 
-    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):  # отрисовка фигуры
+    def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
+        # отрисовка фигуры
         if self.color:  # если пешка белая
             image_name = 'white_pawn.png'  # имя фаила картинки
             sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
@@ -257,13 +263,15 @@ class Pawn(Piece):
         else:
             lst = [1]
         if self.color:  # фигура белая
-            if self.y - step_y in lst and step_x == self.x and type(board[step_y][step_x]) == int:  # ходит вверх на столько клеток, сколько есть в списке
+            if self.y - step_y in lst and step_x == self.x and type(board[step_y][step_x]) == int:
+                # ходит вверх на столько клеток, сколько есть в списке
                 return True
             elif abs(step_x - self.x) == 1 and self.y - step_y == 1 and \
                     type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
                 return True
         else:
-            if step_y - self.y in lst and step_x == self.x and type(board[step_y][step_x]) == int:  # ходит вниз на столько клеток, сколько есть в списке
+            if step_y - self.y in lst and step_x == self.x and type(board[step_y][step_x]) == int:
+                # ходит вниз на столько клеток, сколько есть в списке
                 return True
             elif abs(step_x - self.x) == 1 and step_y - self.y == 1 and \
                     type(board[step_y][step_x]) != int and board[step_y][step_x].get_color() != self.color:
@@ -408,6 +416,11 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n:  # новая игра
                 board = Chess()  # сздание нового поля
+            if event.mod & pygame.KMOD_CTRL:
+                if event.key == pygame.K_z:  # ctrl + z
+                    if len(board.board_history) > 0:  # если есть записи в истории
+                        board = board.board_history.pop(-1)  # достаю последнюю запись в истории
+                        # и теперь наша доска является доской до хода
 
     board.render(screen)
 
