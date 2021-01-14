@@ -330,7 +330,39 @@ class Rook(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        if step_y == self.y or step_x == self.x:
+        a1 = [[self.y, i] for i in range(self.x + 1, 8)]
+        a2 = [[self.y, i] for i in range(0, self.x)][::-1]
+        a3 = [[i, self.x] for i in range(self.y + 1, 8)]
+        a4 = [[i, self.x] for i in range(0, self.y)][::-1]
+        for i in range(len(a1)):
+            if type(board[a1[i][0]][a1[i][1]]) != int:
+                if board[a1[i][0]][a1[i][1]].get_color() == self.color:
+                    a1 = a1[:i]
+                else:
+                    a1 = a1[:i + 1]
+                break
+        for i in range(len(a2)):
+            if type(board[a2[i][0]][a2[i][1]]) != int:
+                if board[a2[i][0]][a2[i][1]].get_color() == self.color:
+                    a2 = a2[:i]
+                else:
+                    a2 = a2[:i + 1]
+                break
+        for i in range(len(a3)):
+            if type(board[a3[i][0]][a3[i][1]]) != int:
+                if board[a3[i][0]][a3[i][1]].get_color() == self.color:
+                    a3 = a3[:i]
+                else:
+                    a3 = a3[:i + 1]
+                break
+        for i in range(len(a4)):
+            if type(board[a4[i][0]][a4[i][1]]) != int:
+                if board[a4[i][0]][a4[i][1]].get_color() == self.color:
+                    a4 = a4[:i]
+                else:
+                    a4 = a4[:i + 1]
+                break
+        if [step_y, step_x] in a1 + a2 + a3 + a4:
             return True
         return False
 
@@ -443,8 +475,10 @@ class Knight(Piece):
         super().render(sprite_group, sprite_size_y, sprite_size_x, delta_y, delta_x, image_name)
 
     def is_it_possible_step(self, step_y, step_x, board):
-        if abs(step_x - self.x) in [1, 2] and abs(step_y - self.y) in [1, 2] and abs(step_x - self.x) != abs(step_y - self.y):
-            return True
+        if abs(step_x - self.x) in [1, 2] and abs(step_y - self.y) in [1, 2] \
+                and abs(step_x - self.x) != abs(step_y - self.y):
+            if type(board[step_y][step_x]) == int or board[step_y][step_x].get_color() != self.color:
+                return True
         return False
 
 
