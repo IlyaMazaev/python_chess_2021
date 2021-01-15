@@ -162,23 +162,36 @@ class Chess(Board):
                 if isinstance(self.board[y][x], King):  # если ходим королём
                     for i in range(8):  # перебираем клетки
                         for j in range(8):
-                            if self.is_cell_under_attack(i, j, self.board[y][x].get_color()):
+                            if self.is_cell_under_attack(i, j, self.board[y][x].get_color())[0]:
                                 # если клетка под атакой противника, убираем её из возможных ходов короля
                                 steps_field[i][j] = 0
 
                 # проверка на возможность рокировки:
                 # для белой стороны
+                # ближняя рокировка
                 if (y, x) == (7, 4) and isinstance(self.board[y][x], King) and isinstance(self.board[7][7], Rook):
                     # если король стоит на месте хода и ладья на своем
                     if self.board[7][5] == 0 and self.board[7][6] == 0:  # если между ними нет других фигур
                         if not self.board[y][x].was_moved and not self.board[7][7].was_moved:  # если они не ходили
                             steps_field[7][6] = 1  # добавляем возможность хода на 2 клетки для рокировки
+                # дальняя рокировка
+                if (y, x) == (7, 4) and isinstance(self.board[y][x], King) and isinstance(self.board[7][0], Rook):
+                    # если король стоит на месте хода и ладья на своем
+                    if self.board[7][1] == 0 and self.board[7][2] == 0 and self.board[7][3] == 0:  # ауть чист
+                        if not self.board[y][x].was_moved and not self.board[7][0].was_moved:  # если они не ходили
+                            steps_field[7][2] = 1  # добавляем возможность хода на 2 клетки для рокировки
                 # для чёрной стороны
-                elif (y, x) == (0, 4) and isinstance(self.board[y][x], King) and isinstance(self.board[0][7], Rook):
+                if (y, x) == (0, 4) and isinstance(self.board[y][x], King) and isinstance(self.board[0][7], Rook):
                     # если король стоит на месте хода и ладья на своем
                     if self.board[0][5] == 0 and self.board[0][6] == 0:  # если между ними нет других фигур
                         if not self.board[y][x].was_moved and not self.board[0][7].was_moved:  # если они не ходили
                             steps_field[0][6] = 1  # добавляем возможность хода на 2 клетки для рокировки
+                # дальняя рокировка
+                if (y, x) == (0, 4) and isinstance(self.board[y][x], King) and isinstance(self.board[0][0], Rook):
+                    # если король стоит на месте хода и ладья на своем
+                    if self.board[0][1] == 0 and self.board[0][2] == 0 and self.board[0][3] == 0:  # ауть чист
+                        if not self.board[y][x].was_moved and not self.board[0][0].was_moved:  # если они не ходили
+                            steps_field[0][2] = 1  # добавляем возможность хода на 2 клетки для рокировки
 
                 for i in range(8):
                     for j in range(8):
@@ -221,6 +234,28 @@ class Chess(Board):
                             self.board[y][x].was_moved = 1  # меняем флаг короля (т.к она ходила)
                             self.board[7][7] = 0  # очистка начальной координаты ладьи
                             # если рокировка произошла, то король идёт по основному алгоритму
+                        elif (  # для белой стороны дальняя рокировка
+                                (y, x) == (7, 4)
+                                and isinstance(self.board[y][x], King)  # если ход королём в клетку рокировки
+                                and (step_y, step_x) == (7, 2)
+                        ):
+                            self.board[7][3] = self.board[7][0]  # перемещаем ладью
+                            self.board[7][3].set_new_position(7, 3)  # обновляем координаты ладьи
+                            self.board[7][3].was_moved = 1  # меняем флаг ладьи (т.к она ходила)
+                            self.board[y][x].was_moved = 1  # меняем флаг короля (т.к она ходила)
+                            self.board[7][0] = 0  # очистка начальной координаты ладьи
+                            # если рокировка произошла, то король идёт по основному алгоритму
+                        elif (  # для чёрной стороны дальняя рокировка
+                                (y, x) == (0, 4)
+                                and isinstance(self.board[y][x], King)  # если ход королём в клетку рокировки
+                                and (step_y, step_x) == (0, 2)
+                        ):
+                            self.board[0][3] = self.board[0][0]  # перемещаем ладью
+                            self.board[0][3].set_new_position(0, 3)  # обновляем координаты ладьи
+                            self.board[0][3].was_moved = 1  # меняем флаг ладьи (т.к она ходила)
+                            self.board[y][x].was_moved = 1  # меняем флаг короля (т.к она ходила)
+                            self.board[0][0] = 0  # очистка начальной координаты ладьи
+                            # если рокировка произошла, то король идёт по основному алгоритму
                         elif (  # для чёрной стороны
                                 (y, x) == (0, 4)
                                 and isinstance(self.board[y][x], King)  # если ход королём в клетку рокировки
@@ -238,7 +273,7 @@ class Chess(Board):
                             self.eaten_pieces.append(self.board[step_y][step_x])  # съеденная фигура записана в листок
                         self.board[step_y][step_x] = 0  # очистка клетки шага
                         self.board[step_y][step_x] = self.board[y][x]  # перемещение фигуры в клетку хода
-                        if type(self.board[step_y][step_x]) == Pawn:
+                        if type(self.board[step_y][step_x]) != int:
                             self.board[step_y][step_x].was_moved = 1
                         self.board[y][x].set_new_position(step_y, step_x)  # обновляем координаты самой фигуры
                         self.board[y][x] = 0  # очистка начальной координаты хода
