@@ -1,4 +1,5 @@
 from copy import deepcopy
+from pprint import pprint
 import pygame
 import os
 import sys
@@ -70,6 +71,13 @@ class Chess(Board):
         self.eaten_pieces = []  # листок, который хранит съеденные фигуры
         self.board_history = []  # для записи истории ходов(для ctrl+z)
 
+    def replace_to_last_from_history(self):
+        self.board = self.board_history.pop()  # достаю последнюю запись из истории
+        # теперь доска равна последней записи
+        self.step = not self.step  # меняю ход
+        board.render(screen)  # рисую новую доску
+        pygame.display.flip()
+
     # отрисовка доски
     def render(self, input_screen):
         input_screen.fill((0, 0, 0))  # очистка экрана
@@ -110,7 +118,8 @@ class Chess(Board):
             for j in range(8):
                 if not isinstance(self.board[i][j], int) and not isinstance(self.board[i][j], Pawn):
                     # если в клетке стоит фигура
-                    if self.board[i][j].is_it_possible_step(y, x, self.board) and self.board[i][j].get_color() is not color:
+                    if (self.board[i][j].is_it_possible_step(y, x, self.board)
+                            and self.board[i][j].get_color() is not color):
                         # и фигура может сходить в эту клетку, значит клетка под атакой
                         return True
         # проверка на атаку пешек
@@ -137,7 +146,7 @@ class Chess(Board):
         print('стартовые координаты:', y, x)
         if bool(self.board[y][x]):  # если нажатие произошло на фигуру
             if self.step == self.board[y][x].color:  # можно ходить только в свой ход(проверка на цвет фигуры = хода)
-                # board_before_step = deepcopy(self)  # копия доски до хода
+                board_before_step = deepcopy(self.board)  # копия доски до хода
                 self.render(screen_of_click)  # отривоска самой доски и фигур
                 steps_field = self.board[y][x].possible_steps_field(self.board)  # получение всех возможный ходов фигуры
                 # для того, чтобы нельзя было подставить короля под атаку
@@ -223,11 +232,10 @@ class Chess(Board):
                             self.board[step_y][step_x].was_moved = 1
                         self.board[y][x].set_new_position(step_y, step_x)  # обновляем координаты самой фигуры
                         self.board[y][x] = 0  # очистка начальной координаты хода
-                        '''
+
                         self.board_history.append(board_before_step)  # записываем доску до хода(для работы ctrl+z)
-                        if len(self.board_history) > 3:  # если более 10 записей истории поля:
+                        if len(self.board_history) > 10:  # если более 10 записей истории поля:
                             self.board_history.pop(0)  # удаляем самую раннюю
-                        '''
 
                         # превращение пешки
                         for x in range(8):  # перебираем x
@@ -256,7 +264,6 @@ class Chess(Board):
                                                         self.top + self.cell_size * y + self.cell_size // 2),
                                                        self.cell_size // 2 - 20, 3)
                                     pygame.display.flip()
-
 
 
 class Piece:
@@ -388,7 +395,8 @@ class Piece:
             sys.exit()
         image = pygame.image.load(fullname)
         if self.is_alive:  # если фигура жива, то спрайт рисуется на поле
-            transformed_image = pygame.transform.scale(image, (sprite_size_y, sprite_size_x))  # подгонка размеров картинки
+            transformed_image = pygame.transform.scale(image, (sprite_size_y, sprite_size_x))
+            # подгонка размеров картинки
             sprite = pygame.sprite.Sprite(sprite_group)  # создание спрайта в группе спрайтов
             sprite.image = transformed_image  # картинка спарайтиа
             sprite.rect = sprite.image.get_rect()
@@ -661,7 +669,7 @@ while running:
             if event.mod & pygame.KMOD_CTRL:
                 if event.key == pygame.K_z:  # ctrl + z
                     if len(board.board_history) > 0:  # если есть записи в истории
-                        board = board.board_history.pop()  # достаю последнюю запись в истории
+                        board.replace_to_last_from_history()  # достаю последнюю запись в истории
                         # и теперь наша доска является доской до хода
 
 pygame.quit()
