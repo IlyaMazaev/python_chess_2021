@@ -105,29 +105,30 @@ class Chess(Board):
             dead_pieces_sprites.draw(input_screen)
 
     def is_cell_under_attack(self, y, x, color):
-        '''
         for i in range(8):
             for j in range(8):
-                if self.board[i][j].is_it_possible_step(y, x, self.board) and self.board[i][j].get_color() is not color:
-                    return True
-        '''
-        if color and y > 1:
-            if x > 0:
-                if isinstance(self.board[y - 1][x - 1], Pawn):
-                    if self.board[y - 1][x - 1].get_color() is not color:
+                if not isinstance(self.board[i][j], int):  # если в клетке стоит фигура
+                    if self.board[i][j].is_it_possible_step(y, x, self.board) and self.board[i][j].get_color() is not color:
+                        # и фигура может сходить в эту клетку, значит клетка под атакой
                         return True
-            if x < 7:
-                if isinstance(self.board[y - 1][x + 1], Pawn):
-                    if self.board[y - 1][x + 1].get_color() is not color:
+        # проверка на атаку пешек
+        if color and y > 1:  # проверка чёрных пешек
+            if x > 0:  # правильность координат
+                if isinstance(self.board[y - 1][x - 1], Pawn):  # если в пешка может атаковать
+                    if self.board[y - 1][x - 1].get_color() is not color:  # и она противоположного цвета
                         return True
-        if not color and y < 7:
-            if x > 0:
-                if isinstance(self.board[y + 1][x - 1], Pawn):
-                    if self.board[y + 1][x - 1].get_color() is not color:
+            if x < 7:  # правильность координат
+                if isinstance(self.board[y - 1][x + 1], Pawn):  # если в пешка может атаковать
+                    if self.board[y - 1][x + 1].get_color() is not color:  # и она противоположного цвета
                         return True
-            if x < 7:
-                if isinstance(self.board[y + 1][x + 1], Pawn):
-                    if self.board[y + 1][x + 1].get_color() is not color:
+        if not color and y < 7:  # проверка белых пешек
+            if x > 0:  # правильность координат
+                if isinstance(self.board[y + 1][x - 1], Pawn):  # если в пешка может атаковать
+                    if self.board[y + 1][x - 1].get_color() is not color:  # и она противоположного цвета
+                        return True
+            if x < 7:  # правильность координат
+                if isinstance(self.board[y + 1][x + 1], Pawn):  # если в пешка может атаковать
+                    if self.board[y + 1][x + 1].get_color() is not color:  # и она противоположного цвета
                         return True
 
     def on_click(self, y, x, screen_of_click):  # обработчик действий на поле
