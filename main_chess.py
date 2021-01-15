@@ -1,5 +1,4 @@
 from copy import deepcopy
-from pprint import pprint
 import pygame
 import os
 import sys
@@ -193,6 +192,7 @@ class Chess(Board):
                         if local_event.type == pygame.MOUSEBUTTONDOWN:
                             if local_event.button == 1:
                                 step_y, step_x = board.get_cell(local_event.pos)  # координаты хода
+                                self.render(screen_of_click)
                                 local_running = False  # выход из цикла
                     local_clock.tick(30)
                 print('координаты хода:', step_y, step_x)
@@ -455,7 +455,7 @@ class Pawn(Piece):
         if self.color:  # если фигура белая
             if type(board[self.y - 1][self.x]) == int:  # проверка на ход вперёд на одну клетку
                 accepted.append([self.y - 1, self.x])
-            if not self.was_moved and type(board[self.y - 2][self.x]):  # проверка на ход вперёд на две клетки
+            if not self.was_moved and isinstance(board[self.y - 2][self.x], int):  # проверка на ход на две клетки
                 accepted.append([self.y - 2, self.x])
             if not f2 and type(board[self.y - 1][self.x + 1]) != int and board[self.y - 1][self.x + 1].get_color() != self.color:
                 accepted.append([self.y - 1, self.x + 1])  # проверка, что можно съесть справа
@@ -464,7 +464,7 @@ class Pawn(Piece):
         else:
             if type(board[self.y + 1][self.x]) == int:  # пешка может сходить на 1 клетку вперёд
                 accepted.append([self.y + 1, self.x])
-            if not self.was_moved and type(board[self.y + 2][self.x]):  # пешка может сходить на две клетки вперёд
+            if not self.was_moved and isinstance(board[self.y + 2][self.x], int):  # пешка может сходить на две клетки
                 accepted.append([self.y + 2, self.x])
             if not f2 and type(board[self.y + 1][self.x + 1]) != int and board[self.y + 1][self.x + 1].get_color() != self.color:
                 accepted.append([self.y + 1, self.x + 1])  # проверка на съедание фигуры справа
