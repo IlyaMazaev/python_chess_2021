@@ -103,11 +103,13 @@ class Chess(Board):
                     piece.render(dead_pieces_sprites, 25, 30, 595, 30 * rendered_eaten_black + 10)
                     rendered_eaten_black += 1
             dead_pieces_sprites.draw(input_screen)
+        pygame.display.flip()
 
     def is_cell_under_attack(self, y, x, color):
         for i in range(8):
             for j in range(8):
-                if not isinstance(self.board[i][j], int):  # если в клетке стоит фигура
+                if not isinstance(self.board[i][j], int) and not isinstance(self.board[i][j], Pawn):
+                    # если в клетке стоит фигура
                     if self.board[i][j].is_it_possible_step(y, x, self.board) and self.board[i][j].get_color() is not color:
                         # и фигура может сходить в эту клетку, значит клетка под атакой
                         return True
@@ -237,6 +239,9 @@ class Chess(Board):
                                 # то на её месте создаётся ферзь с координатами и цветом пешки
                                 self.board[7][x] = Queen(*self.board[7][x].get_pos(), self,
                                                          self.board[7][x].get_color())
+                        print('ход выполнен')
+                        self.step = not self.step  # смена хода
+                        self.render(screen_of_click)
 
                         # проверка на шах:
                         for y in range(8):
@@ -245,10 +250,13 @@ class Chess(Board):
                                               King) and self.is_cell_under_attack(y, x, self.board[y][x].get_color()):
                                     # если в клетке стоит король и на него может напасть другая фигура
                                     print('шах')
+                                    # рисую красный кружок над королём если он под атакой
+                                    pygame.draw.circle(screen_of_click, pygame.Color('Red'),
+                                                       (self.left + self.cell_size * x + self.cell_size // 2,
+                                                        self.top + self.cell_size * y + self.cell_size // 2),
+                                                       self.cell_size // 2 - 20, 3)
+                                    pygame.display.flip()
 
-
-                        self.step = not self.step  # смена хода
-                        print('ход выполнен')
 
 
 class Piece:
@@ -634,6 +642,7 @@ pygame.display.set_caption('Шахматы')
 clock = pygame.time.Clock()
 FPS = 30
 
+board.render(screen)
 running = True
 while running:
     for event in pygame.event.get():
@@ -642,6 +651,8 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
+                board.render(screen)
+                pygame.display.flip()
                 board.on_click(*board.get_cell(event.pos), screen)
 
         if event.type == pygame.KEYDOWN:
@@ -653,8 +664,4 @@ while running:
                         board = board.board_history.pop()  # достаю последнюю запись в истории
                         # и теперь наша доска является доской до хода
 
-    board.render(screen)
-
-    clock.tick(FPS)
-    pygame.display.flip()
 pygame.quit()
