@@ -446,7 +446,7 @@ class Piece:
         return a1 + a2 + a3 + a4  # соединение списков и возврат общего списка
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defied'):
-        fullname = os.path.join('обрезанные шахматы', image_name)  # путь к фаилу с картинкой
+        fullname = os.path.join('data', image_name)  # путь к фаилу с картинкой
         # если файл не существует, то выходим
         if not os.path.isfile(fullname):
             print(f"Файл с изображением '{fullname}' не найден")
