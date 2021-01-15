@@ -341,7 +341,6 @@ class Piece:
             a4.append(curr.copy())
             curr[0] += 1
             curr[1] -= 1
-        a4 = a4[::-1]
         for i in range(len(a1)):
             if type(board[a1[i][0]][a1[i][1]]) != int:
                 if board[a1[i][0]][a1[i][1]].get_color() == self.color:
@@ -435,22 +434,24 @@ class Pawn(Piece):
 
     def is_it_possible_step(self, step_y, step_x, board):  # проверка на возможность шага(ввод- конечные координаты)
         accepted = []
+        f1, f2 = self.x == 0, self.x == 7
         if self.color:
             if type(board[self.y - 1][self.x]) == int:
                 accepted.append([self.y - 1, self.x])
             if not self.was_moved and type(board[self.y - 2][self.x]):
                 accepted.append([self.y - 2, self.x])
-            if type(board[self.y - 1][self.x + 1]) != int and board[self.y - 1][self.x + 1].get_color() != self.color:
+            if not f2 and type(board[self.y - 1][self.x + 1]) != int and board[self.y - 1][self.x + 1].get_color() != self.color:
                 accepted.append([self.y - 1, self.x + 1])
-            if type(board[self.y - 1][self.x - 1]) != int and board[self.y - 1][self.x - 1].get_color() != self.color:
+            if not f1 and type(board[self.y - 1][self.x - 1]) != int and board[self.y - 1][self.x - 1].get_color() != self.color:
                 accepted.append([self.y - 1, self.x - 1])
         else:
-            accepted.append([self.y + 1, self.x])
+            if type(board[self.y + 1][self.x]) == int:
+                accepted.append([self.y + 1, self.x])
             if not self.was_moved:
                 accepted.append([self.y + 2, self.x])
-            if type(board[self.y + 1][self.x + 1]) != int and board[self.y + 1][self.x + 1].get_color() != self.color:
+            if not f2 and type(board[self.y + 1][self.x + 1]) != int and board[self.y + 1][self.x + 1].get_color() != self.color:
                 accepted.append([self.y + 1, self.x + 1])
-            if type(board[self.y + 1][self.x - 1]) != int and board[self.y + 1][self.x - 1].get_color() != self.color:
+            if not f1 and type(board[self.y + 1][self.x - 1]) != int and board[self.y + 1][self.x - 1].get_color() != self.color:
                 accepted.append([self.y + 1, self.x - 1])
         if [step_y, step_x] in accepted:
             return True
