@@ -281,11 +281,11 @@ class Piece:
 
     def get_linear_moves(self):
         board = self.board
-        a1 = [[self.y, i] for i in range(self.x + 1, 8)]
-        a2 = [[self.y, i] for i in range(0, self.x)][::-1]
-        a3 = [[i, self.x] for i in range(self.y + 1, 8)]
-        a4 = [[i, self.x] for i in range(0, self.y)][::-1]
-        for i in range(len(a1)):
+        a1 = [[self.y, i] for i in range(self.x + 1, 8)]  # 4 списка для всех, даже если заблокированы, ходов (справа)
+        a2 = [[self.y, i] for i in range(0, self.x)][::-1]  # (слева)
+        a3 = [[i, self.x] for i in range(self.y + 1, 8)]  # (снизу)
+        a4 = [[i, self.x] for i in range(0, self.y)][::-1]  # (сверху)
+        for i in range(len(a1)):  # 4 цикла для обработки возможных ходов, проверка на пустое место и фигуру противника.
             if type(board[a1[i][0]][a1[i][1]]) != int:
                 if board[a1[i][0]][a1[i][1]].get_color() == self.color:
                     a1 = a1[:i]
@@ -313,35 +313,35 @@ class Piece:
                 else:
                     a4 = a4[:i + 1]
                 break
-        return a1 + a2 + a3 + a4
+        return a1 + a2 + a3 + a4  # соединение всех сторон и возврат списка.
 
     def get_diagonal_moves(self):
         board = self.board
-        a1 = []
+        a1 = []  # создание 4ёх списков для отрисовки всех, даже заблокированных, ходов (северо-запад)
         curr = [self.y - 1, self.x - 1]
         while curr[0] >= 0 and curr[1] >= 0:
             a1.append(curr.copy())
             curr[0] -= 1
             curr[1] -= 1
-        a2 = []
+        a2 = []  # (юго-восток)
         curr = [self.y + 1, self.x + 1]
         while curr[0] <= 7 and curr[1] <= 7:
             a2.append(curr.copy())
             curr[0] += 1
             curr[1] += 1
-        a3 = []
+        a3 = []  # (северо-восток)
         curr = [self.y - 1, self.x + 1]
         while curr[0] >= 0 and curr[1] <= 7:
             a3.append(curr.copy())
             curr[0] -= 1
             curr[1] += 1
-        a4 = []
+        a4 = []  # (юго-запад)
         curr = [self.y + 1, self.x - 1]
         while curr[0] <= 7 and curr[1] >= 0:
             a4.append(curr.copy())
             curr[0] += 1
             curr[1] -= 1
-        for i in range(len(a1)):
+        for i in range(len(a1)):  # обработка списков для нахождения возможных ходов
             if type(board[a1[i][0]][a1[i][1]]) != int:
                 if board[a1[i][0]][a1[i][1]].get_color() == self.color:
                     a1 = a1[:i]
@@ -369,7 +369,7 @@ class Piece:
                 else:
                     a4 = a4[:i + 1]
                 break
-        return a1 + a2 + a3 + a4
+        return a1 + a2 + a3 + a4  # соединение списков и возврат общего списка
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defied'):
         fullname = os.path.join('обрезанные шахматы', image_name)  # путь к фаилу с картинкой
@@ -434,25 +434,25 @@ class Pawn(Piece):
 
     def is_it_possible_step(self, step_y, step_x, board):  # проверка на возможность шага(ввод- конечные координаты)
         accepted = []
-        f1, f2 = self.x == 0, self.x == 7
-        if self.color:
-            if type(board[self.y - 1][self.x]) == int:
+        f1, f2 = self.x == 0, self.x == 7  # флаги для проверки, что фигура стоит не на боках доски.
+        if self.color:  # если фигура белая
+            if type(board[self.y - 1][self.x]) == int:  # проверка на ход вперёд на одну клетку
                 accepted.append([self.y - 1, self.x])
-            if not self.was_moved and type(board[self.y - 2][self.x]):
+            if not self.was_moved and type(board[self.y - 2][self.x]):  # проверка на ход вперёд на две клетки
                 accepted.append([self.y - 2, self.x])
             if not f2 and type(board[self.y - 1][self.x + 1]) != int and board[self.y - 1][self.x + 1].get_color() != self.color:
-                accepted.append([self.y - 1, self.x + 1])
+                accepted.append([self.y - 1, self.x + 1])  # проверка, что можно съесть справа
             if not f1 and type(board[self.y - 1][self.x - 1]) != int and board[self.y - 1][self.x - 1].get_color() != self.color:
-                accepted.append([self.y - 1, self.x - 1])
+                accepted.append([self.y - 1, self.x - 1])  # проверка, что можно съесть слева
         else:
-            if type(board[self.y + 1][self.x]) == int:
+            if type(board[self.y + 1][self.x]) == int:  # пешка может сходить на 1 клетку вперёд
                 accepted.append([self.y + 1, self.x])
-            if not self.was_moved:
+            if not self.was_moved and type(board[self.y + 2][self.x]):  # пешка может сходить на две клетки вперёд
                 accepted.append([self.y + 2, self.x])
             if not f2 and type(board[self.y + 1][self.x + 1]) != int and board[self.y + 1][self.x + 1].get_color() != self.color:
-                accepted.append([self.y + 1, self.x + 1])
+                accepted.append([self.y + 1, self.x + 1])  # проверка на съедание фигуры справа
             if not f1 and type(board[self.y + 1][self.x - 1]) != int and board[self.y + 1][self.x - 1].get_color() != self.color:
-                accepted.append([self.y + 1, self.x - 1])
+                accepted.append([self.y + 1, self.x - 1])  # проверка на съедание фигуры слева
         if [step_y, step_x] in accepted:
             return True
         return False
@@ -511,8 +511,8 @@ class King(Piece):
 
     def is_it_possible_step(self, step_y, step_x, board):
         accepted = []
-        f1, f2, f3, f4 = self.y > 0, self.y < 7, self.x > 0, self.x < 7
-        if f1:
+        f1, f2, f3, f4 = self.y > 0, self.y < 7, self.x > 0, self.x < 7  # флаги для проверки, что фигура не на краях.
+        if f1:  # ветвления для проверки ходов по направлениям на 1 клетку. (ниже цикл для отсекания плохих ходов.)
             accepted.append([self.y - 1, self.x])
             if f3:
                 accepted.append([self.y - 1, self.x - 1])
