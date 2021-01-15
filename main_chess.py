@@ -67,6 +67,7 @@ class Chess(Board):
         self.board[7][4] = King(7, 4, self.board, True)
 
         self.step = True  # True означает белый цвет хода
+        self.game_over = False  # пока значение False игрф идёт
         self.eaten_pieces = []  # листок, который хранит съеденные фигуры
         self.board_history = []  # для записи истории ходов(для ctrl+z)
 
@@ -110,9 +111,17 @@ class Chess(Board):
                     piece.render(dead_pieces_sprites, 25, 30, 595, 30 * rendered_eaten_black + 10)
                     rendered_eaten_black += 1
             dead_pieces_sprites.draw(input_screen)
+        if self.game_over:
+            font = pygame.font.Font(None, 50)
+            line1 = font.render('Шах и Мат', True, pygame.Color('Red'))
+            line2 = font.render('игра окончена', True, pygame.Color('Red'))
+            line3 = font.render('для начала новой нажмите N', True, pygame.Color('Red'))
+            input_screen.blit(line1, (190, 150))
+            input_screen.blit(line2, (150, 200))
+            input_screen.blit(line3, (20, 250))
         pygame.display.flip()
 
-    def is_cell_under_attack(self, y, x, color):
+    def is_cell_under_attack(self, y, x, color):  # проверяет атакована ли клетка
         for i in range(8):
             for j in range(8):
                 if not isinstance(self.board[i][j], int) and not isinstance(self.board[i][j], Pawn):
@@ -120,30 +129,31 @@ class Chess(Board):
                     if (self.board[i][j].is_it_possible_step(y, x, self.board)
                             and self.board[i][j].get_color() is not color):
                         # и фигура может сходить в эту клетку, значит клетка под атакой
-                        return True
+                        return True, (i, j)
         # проверка на атаку пешек
         if color and y > 1:  # проверка чёрных пешек
             if x > 0:  # правильность координат
                 if isinstance(self.board[y - 1][x - 1], Pawn):  # если в пешка может атаковать
                     if self.board[y - 1][x - 1].get_color() is not color:  # и она противоположного цвета
-                        return True
+                        return True, (y - 1, x - 1)
             if x < 7:  # правильность координат
                 if isinstance(self.board[y - 1][x + 1], Pawn):  # если в пешка может атаковать
                     if self.board[y - 1][x + 1].get_color() is not color:  # и она противоположного цвета
-                        return True
+                        return True, (y - 1, x + 1)
         if not color and y < 7:  # проверка белых пешек
             if x > 0:  # правильность координат
                 if isinstance(self.board[y + 1][x - 1], Pawn):  # если в пешка может атаковать
                     if self.board[y + 1][x - 1].get_color() is not color:  # и она противоположного цвета
-                        return True
+                        return True, (y + 1, x - 1)
             if x < 7:  # правильность координат
                 if isinstance(self.board[y + 1][x + 1], Pawn):  # если в пешка может атаковать
                     if self.board[y + 1][x + 1].get_color() is not color:  # и она противоположного цвета
-                        return True
+                        return True, (y + 1, x + 1)
+        return False, (10, 10)
 
     def on_click(self, y, x, screen_of_click):  # обработчик действий на поле
         print('стартовые координаты:', y, x)
-        if bool(self.board[y][x]):  # если нажатие произошло на фигуру
+        if bool(self.board[y][x]) and not self.game_over:  # если нажатие произошло на фигуру
             if self.step == self.board[y][x].color:  # можно ходить только в свой ход(проверка на цвет фигуры = хода)
                 board_before_step = deepcopy(self.board)  # копия доски до хода
                 self.render(screen_of_click)  # отривоска самой доски и фигур
@@ -250,12 +260,15 @@ class Chess(Board):
                         print('ход выполнен')
                         self.step = not self.step  # смена хода
                         self.render(screen_of_click)
-
+                        for piece in self.eaten_pieces:
+                            if isinstance(piece, King):
+                                self.game_over = True
+                                board.render(screen_of_click)
                         # проверка на шах:
                         for y in range(8):
                             for x in range(8):
                                 if isinstance(self.board[y][x],
-                                              King) and self.is_cell_under_attack(y, x, self.board[y][x].get_color()):
+                                              King) and self.is_cell_under_attack(y, x, self.board[y][x].get_color())[0]:
                                     # если в клетке стоит король и на него может напасть другая фигура
                                     print('шах')
                                     # рисую красный кружок над королём если он под атакой
@@ -264,6 +277,16 @@ class Chess(Board):
                                                         self.top + self.cell_size * y + self.cell_size // 2),
                                                        self.cell_size // 2 - 20, 3)
                                     pygame.display.flip()
+
+                                    if self.board[y][x].possible_steps_field(self.board) == [[0] * 8 for _ in range(8)]:
+                                        # если королю некуда ходить
+                                        attack_pos = self.is_cell_under_attack(y, x, self.board[y][x].get_color())[1]
+                                        print(attack_pos)
+                                        # координаты, откуда произошла атака
+                                        if self.is_cell_under_attack(*attack_pos, not self.board[y][x].get_color())[0]:
+                                            # если атакующая фигура не под атакой(её нельзя устранить)
+                                            print('мат')
+                                            self.game_over = True
 
 
 class Piece:
@@ -666,6 +689,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_n:  # новая игра
                 board = Chess()  # сздание нового поля
+                board.render(screen)
             if event.mod & pygame.KMOD_CTRL:
                 if event.key == pygame.K_z:  # ctrl + z
                     if len(board.board_history) > 0:  # если есть записи в истории
