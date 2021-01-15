@@ -104,14 +104,46 @@ class Chess(Board):
                     rendered_eaten_black += 1
             dead_pieces_sprites.draw(input_screen)
 
+    def is_cell_under_attack(self, y, x, color):
+        '''
+        for i in range(8):
+            for j in range(8):
+                if self.board[i][j].is_it_possible_step(y, x, self.board) and self.board[i][j].get_color() is not color:
+                    return True
+        '''
+        if color and y > 1:
+            if x > 0:
+                if isinstance(self.board[y - 1][x - 1], Pawn):
+                    if self.board[y - 1][x - 1].get_color() is not color:
+                        return True
+            if x < 7:
+                if isinstance(self.board[y - 1][x + 1], Pawn):
+                    if self.board[y - 1][x + 1].get_color() is not color:
+                        return True
+        if not color and y < 7:
+            if x > 0:
+                if isinstance(self.board[y + 1][x - 1], Pawn):
+                    if self.board[y + 1][x - 1].get_color() is not color:
+                        return True
+            if x < 7:
+                if isinstance(self.board[y + 1][x + 1], Pawn):
+                    if self.board[y + 1][x + 1].get_color() is not color:
+                        return True
+
     def on_click(self, y, x, screen_of_click):  # обработчик действий на поле
         print('стартовые координаты:', y, x)
         if bool(self.board[y][x]):  # если нажатие произошло на фигуру
             if self.step == self.board[y][x].color:  # можно ходить только в свой ход(проверка на цвет фигуры = хода)
-                board_before_step = deepcopy(self)  # копия доски до хода
+                # board_before_step = deepcopy(self)  # копия доски до хода
                 self.render(screen_of_click)  # отривоска самой доски и фигур
-
                 steps_field = self.board[y][x].possible_steps_field(self.board)  # получение всех возможный ходов фигуры
+                # для того, чтобы нельзя было подставить короля под атаку
+                if isinstance(self.board[y][x], King):  # если ходим королём
+                    for i in range(8):  # перебираем клетки
+                        for j in range(8):
+                            if self.is_cell_under_attack(i, j, self.board[y][x].get_color()):
+                                # если клетка под атакой противника, убираем её из возможных ходов короля
+                                steps_field[i][j] = 0
 
                 # проверка на возможность рокировки:
                 # для белой стороны
@@ -188,11 +220,33 @@ class Chess(Board):
                             self.board[step_y][step_x].was_moved = 1
                         self.board[y][x].set_new_position(step_y, step_x)  # обновляем координаты самой фигуры
                         self.board[y][x] = 0  # очистка начальной координаты хода
+                        '''
+                        self.board_history.append(board_before_step)  # записываем доску до хода(для работы ctrl+z)
+                        if len(self.board_history) > 3:  # если более 10 записей истории поля:
+                            self.board_history.pop(0)  # удаляем самую раннюю
+                        '''
+
+                        # превращение пешки
+                        for x in range(8):  # перебираем x
+                            if isinstance(self.board[0][x], Pawn):  # если в 0 строке есть пешка
+                                # то на её месте создаётся ферзь с координатами и цветом пешки
+                                self.board[0][x] = Queen(*self.board[0][x].get_pos(), self,
+                                                         self.board[0][x].get_color())
+                            if isinstance(self.board[7][x], Pawn):  # если в 8 строке есть пешка
+                                # то на её месте создаётся ферзь с координатами и цветом пешки
+                                self.board[7][x] = Queen(*self.board[7][x].get_pos(), self,
+                                                         self.board[7][x].get_color())
+
+                        # проверка на шах:
+                        for y in range(8):
+                            for x in range(8):
+                                if isinstance(self.board[y][x],
+                                              King) and self.is_cell_under_attack(y, x, self.board[y][x].get_color()):
+                                    # если в клетке стоит король и на него может напасть другая фигура
+                                    print('шах')
+
 
                         self.step = not self.step  # смена хода
-                        self.board_history.append(board_before_step)  # записываем доску до хода(для работы ctrl+z)
-                        if len(self.board_history) > 10:
-                            self.board_history.pop(0)
                         print('ход выполнен')
 
 
@@ -363,7 +417,7 @@ class Pawn(Piece):
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
             # отрисовка фигуры
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_pawn.png'  # имя фаила картинки
                 sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
@@ -387,7 +441,7 @@ class Pawn(Piece):
             if not self.was_moved and type(board[self.y - 2][self.x]):
                 accepted.append([self.y - 2, self.x])
             if type(board[self.y - 1][self.x + 1]) != int and board[self.y - 1][self.x + 1].get_color() != self.color:
-                accepted.append([self.y + 1, self.x + 1])
+                accepted.append([self.y - 1, self.x + 1])
             if type(board[self.y - 1][self.x - 1]) != int and board[self.y - 1][self.x - 1].get_color() != self.color:
                 accepted.append([self.y - 1, self.x - 1])
         else:
@@ -409,7 +463,7 @@ class Rook(Piece):
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
-            if self.color:  # если пешка белая
+            if self.color:  # если фиугра белая
                 image_name = 'white_rook.png'  # имя фаила картинки
                 sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
@@ -419,7 +473,7 @@ class Rook(Piece):
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
             # вызов общего кода отрисовки в родительском классе Piece
         else:
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_rook.png'  # имя фаила картинки
             elif self.color is False:
                 image_name = 'black_rook.png'  # имя фаила картинки
@@ -438,7 +492,7 @@ class King(Piece):
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_king.png'  # имя фаила картинки
                 sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
@@ -448,7 +502,7 @@ class King(Piece):
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
             # вызов общего кода отрисовки в родительском классе Piece
         else:
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_king.png'  # имя фаила картинки
             elif self.color is False:
                 image_name = 'black_king.png'  # имя фаила картинки
@@ -485,7 +539,7 @@ class Queen(Piece):
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_queen.png'  # имя фаила картинки
                 sprite_size_y, sprite_size_x = 60, 60  # размеры картинки спрайта
                 delta_y, delta_x = 5, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
@@ -495,7 +549,7 @@ class Queen(Piece):
                 delta_y, delta_x = 5, 5  # тут можно подкрутить расположение спрайта фигуры в клетке
             # вызов общего кода отрисовки в родительском классе Piece
         else:
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_queen.png'  # имя фаила картинки
             elif self.color is False:
                 image_name = 'black_queen.png'  # имя фаила картинки
@@ -514,7 +568,7 @@ class Bishop(Piece):
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_bishop.png'  # имя фаила картинки
                 sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
@@ -524,7 +578,7 @@ class Bishop(Piece):
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
             # вызов общего кода отрисовки в родительском классе Piece
         else:
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_bishop.png'  # имя фаила картинки
             elif self.color is False:
                 image_name = 'black_bishop.png'  # имя фаила картинки
@@ -543,7 +597,7 @@ class Knight(Piece):
 
     def render(self, sprite_group, sprite_size_y=55, sprite_size_x=55, delta_y=0, delta_x=0, image_name='not_defined'):
         if delta_y == 0 and delta_x == 0:  # если параметры были изменены извне, то не меняем их
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_knight.png'  # имя фаила картинки
                 sprite_size_y, sprite_size_x = 50, 60  # размеры картинки спрайта
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
@@ -553,7 +607,7 @@ class Knight(Piece):
                 delta_y, delta_x = 5, 10  # тут можно подкрутить расположение спрайта фигуры в клетке
             # вызов общего кода отрисовки в родительском классе Piece
         else:
-            if self.color:  # если пешка белая
+            if self.color:  # если фигура белая
                 image_name = 'white_knight.png'  # имя фаила картинки
             elif self.color is False:
                 image_name = 'black_knight.png'  # имя фаила картинки
@@ -594,7 +648,7 @@ while running:
             if event.mod & pygame.KMOD_CTRL:
                 if event.key == pygame.K_z:  # ctrl + z
                     if len(board.board_history) > 0:  # если есть записи в истории
-                        board = board.board_history.pop(-1)  # достаю последнюю запись в истории
+                        board = board.board_history.pop()  # достаю последнюю запись в истории
                         # и теперь наша доска является доской до хода
 
     board.render(screen)
