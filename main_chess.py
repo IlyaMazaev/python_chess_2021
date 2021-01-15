@@ -112,10 +112,10 @@ class Chess(Board):
                     rendered_eaten_black += 1
             dead_pieces_sprites.draw(input_screen)
         if self.game_over:
-            font = pygame.font.Font(None, 50)
+            font = pygame.font.Font(None, 40)
             line1 = font.render('Шах и Мат', True, pygame.Color('Red'))
             line2 = font.render('игра окончена', True, pygame.Color('Red'))
-            line3 = font.render('для начала новой нажмите N', True, pygame.Color('Red'))
+            line3 = font.render('для начала новой игры нажмите N', True, pygame.Color('Red'))
             input_screen.blit(line1, (190, 150))
             input_screen.blit(line2, (150, 200))
             input_screen.blit(line3, (20, 250))
