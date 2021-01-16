@@ -2,6 +2,7 @@ from copy import deepcopy
 import pygame
 import os
 import sys
+from pprint import pprint
 
 
 class Board:
@@ -28,9 +29,9 @@ class Board:
         for i in range(self.height):
             for j in range(self.width):
                 if (
-                        self.left + self.cell_size * j < mouse_pos[0] < self.left + self.cell_size * j + self.cell_size
+                        self.left + self.cell_size * j <= mouse_pos[0] <= self.left + self.cell_size * j + self.cell_size
                         and
-                        self.top + self.cell_size * i < mouse_pos[1] < self.top + self.cell_size * i + self.cell_size
+                        self.top + self.cell_size * i <= mouse_pos[1] <= self.top + self.cell_size * i + self.cell_size
                 ):
                     return i, j
         return None
@@ -72,7 +73,10 @@ class Chess(Board):
         self.board_history = []  # для записи истории ходов(для ctrl+z)
 
     def replace_to_last_from_history(self):
-        self.board = self.board_history.pop()  # достаю последнюю запись из истории
+        last_step = self.board_history.pop()  # достаю последнюю запись из истории
+        self.board = last_step[:8]  # перезаписываю доску
+        self.eaten_pieces = last_step[-1]  # перезаписываю листок мёртвых фигур
+        pprint(self.board)
         # теперь доска равна последней записи
         self.step = not self.step  # меняю ход
         board.render(screen)  # рисую новую доску
@@ -156,6 +160,7 @@ class Chess(Board):
         if bool(self.board[y][x]) and not self.game_over:  # если нажатие произошло на фигуру
             if self.step == self.board[y][x].color:  # можно ходить только в свой ход(проверка на цвет фигуры = хода)
                 board_before_step = deepcopy(self.board)  # копия доски до хода
+                board_before_step.append(deepcopy(self.eaten_pieces))  # записываю съеденые фигуры
                 self.render(screen_of_click)  # отривоска самой доски и фигур
                 steps_field = self.board[y][x].possible_steps_field(self.board)  # получение всех возможный ходов фигуры
                 # для того, чтобы нельзя было подставить короля под атаку
